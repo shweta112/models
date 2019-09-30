@@ -49,6 +49,7 @@ class InputDataFields(object):
       is the groundtruth a single object or a crowd.
     groundtruth_area: area of a groundtruth segment.
     groundtruth_difficult: is a `difficult` object
+    groundtruth_occlusion: degree of 'occlusion' of the object
     groundtruth_group_of: is a `group_of` objects, e.g. multiple objects of the
       same class, forming a connected group, where instances are heavily
       occluding each other.
@@ -83,6 +84,7 @@ class InputDataFields(object):
   groundtruth_is_crowd = 'groundtruth_is_crowd'
   groundtruth_area = 'groundtruth_area'
   groundtruth_difficult = 'groundtruth_difficult'
+  groundtruth_occlusion = 'groundtruth_occlusion'
   groundtruth_group_of = 'groundtruth_group_of'
   proposal_boxes = 'proposal_boxes'
   proposal_objectness = 'proposal_objectness'
@@ -178,6 +180,7 @@ class TfExampleFields(object):
     object_view: viewpoint of object, e.g. ["frontal", "left"]
     object_truncated: is object truncated, e.g. [true, false]
     object_occluded: is object occluded, e.g. [true, false]
+    object_occlusion: degree of object occlusion, e.g. [0, 1, 2] for [no-occl, partial-occl, heavy-occl]
     object_difficult: is object difficult, e.g. [true, false]
     object_group_of: is object a single object or a group of objects
     object_depiction: is object a depiction
@@ -214,6 +217,7 @@ class TfExampleFields(object):
   object_view = 'image/object/view'
   object_truncated = 'image/object/truncated'
   object_occluded = 'image/object/occluded'
+  object_occlusion = 'image/object/occlusion'
   object_difficult = 'image/object/difficult'
   object_group_of = 'image/object/group_of'
   object_depiction = 'image/object/depiction'

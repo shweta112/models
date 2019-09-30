@@ -65,7 +65,7 @@ def build_inference_graph(image_tensor, inference_graph_path):
     detected_labels_tensor: Detected labels. Int64 tensor,
         shape=[num_detections]
   """
-  with tf.gfile.Open(inference_graph_path, 'r') as graph_def_file:
+  with tf.gfile.Open(inference_graph_path, 'rb') as graph_def_file:
     graph_content = graph_def_file.read()
   graph_def = tf.GraphDef()
   graph_def.MergeFromString(graph_content)
@@ -139,3 +139,49 @@ def infer_detections_and_add_to_example(
     del feature[standard_fields.TfExampleFields.image_encoded]
 
   return tf_example
+
+
+def infer_detections_and_add_to_txt(
+    serialized_example_tensor, detected_boxes_tensor, detected_scores_tensor,
+    detected_labels_tensor, category_index):
+  """Runs the supplied tensors and returns the inferred detections as text in the order <class_name> <score> <left> <top> <right> <bottom>.
+
+  Args:
+    serialized_example_tensor: Serialized TF example. Scalar string tensor
+    detected_boxes_tensor: Detected boxes. Float tensor,
+        shape=[num_detections, 4]
+    detected_scores_tensor: Detected scores. Float tensor,
+        shape=[num_detections]
+    detected_labels_tensor: Detected labels. Int64 tensor,
+        shape=[num_detections]
+    category_index: a dict containing category dictionaries (each holding
+      category index `id` and category name `name`) keyed by category indices.
+  Returns:
+    The text string with the inferred detections and filename.
+  """
+  features = tf.parse_single_example(
+      serialized_example_tensor,
+      features={
+          standard_fields.TfExampleFields.filename:
+              tf.FixedLenFeature([], tf.string),
+      })
+  file_name_tensor = features[standard_fields.TfExampleFields.filename]
+
+  (serialized_example, detected_boxes, detected_scores,
+   detected_classes, file_name) = tf.get_default_session().run([
+       serialized_example_tensor, detected_boxes_tensor, detected_scores_tensor,
+       detected_labels_tensor, file_name_tensor
+   ])
+  detected_boxes = detected_boxes.T
+
+  print(detected_boxes[1])
+
+  detections_string = ''
+  for box in range(detected_boxes.shape[1]):
+      # <class_name> <score> <left> <top> <right> <bottom>
+      detections_string += '{} {} {} {} {} {}\n'.format(category_index[detected_classes[box]]['name'],
+                                                        detected_scores[box],
+                                                        detected_boxes[1][box], detected_boxes[0][box],
+                                                        detected_boxes[3][box], detected_boxes[2][box])
+
+  return detections_string, file_name.decode()

@@ -188,7 +188,8 @@ def export_tflite_graph(pipeline_config, trained_checkpoint_prefix, output_dir,
 
   image_resizer_config = pipeline_config.model.ssd.image_resizer
   image_resizer = image_resizer_config.WhichOneof('image_resizer_oneof')
-  num_channels = _DEFAULT_NUM_CHANNELS
+  num_channels = 4
+  # num_channels = _DEFAULT_NUM_CHANNELS
   if image_resizer == 'fixed_shape_resizer':
     height = image_resizer_config.fixed_shape_resizer.height
     width = image_resizer_config.fixed_shape_resizer.width

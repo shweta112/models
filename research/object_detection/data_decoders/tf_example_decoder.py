@@ -165,6 +165,8 @@ class TfExampleDecoder(data_decoder.DataDecoder):
     self.keys_to_features = {
         'image/encoded':
             tf.FixedLenFeature((), tf.string, default_value=''),
+        'image/channels':
+            tf.FixedLenFeature((), tf.int64, default_value=1),
         'image/format':
             tf.FixedLenFeature((), tf.string, default_value='jpeg'),
         'image/filename':
@@ -200,6 +202,8 @@ class TfExampleDecoder(data_decoder.DataDecoder):
         'image/object/is_crowd':
             tf.VarLenFeature(tf.int64),
         'image/object/difficult':
+            tf.VarLenFeature(tf.int64),
+        'image/object/occlusion':
             tf.VarLenFeature(tf.int64),
         'image/object/group_of':
             tf.VarLenFeature(tf.int64),
@@ -247,6 +251,8 @@ class TfExampleDecoder(data_decoder.DataDecoder):
             slim_example_decoder.Tensor('image/object/is_crowd')),
         fields.InputDataFields.groundtruth_difficult: (
             slim_example_decoder.Tensor('image/object/difficult')),
+        fields.InputDataFields.groundtruth_occlusion: (
+            slim_example_decoder.Tensor('image/object/occlusion')),
         fields.InputDataFields.groundtruth_group_of: (
             slim_example_decoder.Tensor('image/object/group_of')),
         fields.InputDataFields.groundtruth_weights: (
@@ -310,6 +316,15 @@ class TfExampleDecoder(data_decoder.DataDecoder):
         fields.InputDataFields.groundtruth_classes] = label_handler
     self.items_to_handlers[
         fields.InputDataFields.groundtruth_image_classes] = image_label_handler
+
+  def _read_image(self, keys_to_tensors):
+      image_encoded = keys_to_tensors['image/encoded']
+      height = keys_to_tensors['image/height']
+      width = keys_to_tensors['image/width']
+      channels = keys_to_tensors['image/channels']
+      to_shape = tf.cast(tf.stack([height, width, channels]), tf.int32)
+      image = tf.reshape(tf.decode_raw(image_encoded, tf.uint8), to_shape)
+      return image
 
   def decode(self, tf_example_string_tensor):
     """Decodes serialized tensorflow example and returns a tensor dictionary.

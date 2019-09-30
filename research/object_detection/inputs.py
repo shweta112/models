@@ -213,6 +213,7 @@ def pad_input_data_to_static_shapes(tensor_dict, max_num_boxes, num_classes,
       fields.InputDataFields.filename: [],
       fields.InputDataFields.key: [],
       fields.InputDataFields.groundtruth_difficult: [max_num_boxes],
+      fields.InputDataFields.groundtruth_occlusion: [max_num_boxes],
       fields.InputDataFields.groundtruth_boxes: [max_num_boxes, 4],
       fields.InputDataFields.groundtruth_classes: [max_num_boxes, num_classes],
       fields.InputDataFields.groundtruth_confidences: [
